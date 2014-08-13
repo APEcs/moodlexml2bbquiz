@@ -67,6 +67,11 @@ sub moodle_to_blackboard {
         return $self -> _mdl2bb_shortanswer($question);
     } elsif($question -> {"type"} eq "essay") {
         return $self -> _mdl2bb_essay($question);
+    } elsif($question -> {"type"} eq "truefalse") {
+        return $self -> _mdl2bb_truefalse($question);
+    } elsif($question -> {"type"} eq "matching") {
+        return $self -> _mdl2bb_matching($question);
+
     } else {
         warn "Skipping question '".($question -> {"name"} -> {"text"} || "unknown")."': unsupported type '".$question -> {"type"}."'\n";
     }
@@ -140,6 +145,56 @@ sub _mdl2bb_essay {
     return "$output\n";
 }
 
+
+## @method private $ _mdl2bb_truefalse($question)
+# Convert the question stored in the specified hash from Moodle format to
+# a TSV line suitable to pass to Blackboard.
+#
+# @param question A reference to a hash containing the question information.
+# @return A string containing the question in Blackboard TSV format
+sub _mdl2bb_truefalse {
+    my $self     = shift;
+    my $question = shift;
+    my $output   = "TF";
+
+    # question text, should be html, so strip leading/trailing space and newlines
+    $output .= "\t".$self -> _cleanup_newlines($question -> {"questiontext"} -> {"text"}, 0);
+
+    my $truefalse = '';
+    foreach my $answer (@{$question -> {"answer"}}) {
+        # The correct answer should have fraction == 100 and the string "true" or "false"
+        if($answer -> {"fraction"} == 100) {
+            $truefalse = $answer -> {"text"};
+            last;
+        }
+    }
+    $output .= "\t".($truefalse || "false");
+
+    return "$output\n";
+}
+
+
+## @method private $ _mdl2bb_matching($question)
+# Convert the question stored in the specified hash from Moodle format to
+# a TSV line suitable to pass to Blackboard.
+#
+# @param question A reference to a hash containing the question information.
+# @return A string containing the question in Blackboard TSV format
+sub _mdl2bb_matching {
+    my $self     = shift;
+    my $question = shift;
+    my $output   = "ESS";
+
+    # question text, should be html, so strip leading/trailing space and newlines
+    $output .= "\t".$self -> _cleanup_newlines($question -> {"questiontext"} -> {"text"}, 0);
+
+    foreach my $answer (@{$question -> {"subquestion"}}) {
+        $output .= "\t".$self -> _cleanup_newlines($answer -> {"text"});
+        $output .= "\t".$self -> _cleanup_newlines($answer -> {"answer"} -> {"text"});
+    }
+
+    return "$output\n";
+}
 
 # ============================================================================
 #  Error functions

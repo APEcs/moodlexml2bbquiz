@@ -3,14 +3,29 @@
 ## @file
 # This file contains the moodle quiz export to blackboard import tool.
 #
-##
+# This script will attempt to convert the questions (and possibly answers)
+# in a quiz exported from Moodle in XML format into a TSV format that
+# can be imported into Blackboard. note that this is subject to the normal
+# restrictions on blackboard import (no feedback, no inline images, etc)
+#
+# To convert an exported Moodle XML file to Blackboard TSV, run the script
+# giving it the name of the xml file to convert:
+#
+# ./convert.pl -q quizzes/somequiz.xml
+#
+# this will read the somequiz.xml file in the quizzes directory, and print
+# the TSV data to pass to Blackboard on stdout. If you want to save the
+# TSV data to a file, you can use the -o argument:
+#
+# ./convert.pl -q quizzes/somequiz.xml -o quizzes/bb-somequiz.tsv
+#
 # @author  Chris Page &lt;chris@starforge.co.uk&gt;
 
 use utf8;
 use v5.12;
 use FindBin;
 
-# Work out where the script is, so module and resource loading can work.
+# Work out where the script is, so module loading can work.
 my $scriptpath;
 BEGIN {
     # This handles tainting, horribly permissively
@@ -99,3 +114,24 @@ if($outfile) {
     binmode STDOUT,":utf8";
     print $output;
 }
+
+__END__
+
+=head1 NAME
+
+convert.pl - convert Moodle quiz XML export files to Blackboard TSV
+
+=head1 SYNOPSIS
+
+convert.pl [options]
+
+ Options:
+    -h, -?, --help  Show a brief help message.
+    -m, --man       Show full documentation.
+    -q, --quiz      The filename of the Moodle XML quiz export file to convert
+    -o, --output    The name of the file to write the TSV data to.
+
+=head1 OPTIONS
+
+
+=cut

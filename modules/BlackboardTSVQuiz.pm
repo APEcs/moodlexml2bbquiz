@@ -61,10 +61,12 @@ sub moodle_to_blackboard {
     # (this could be done with given/where, but v5.18/5.20 stupidity.
     if($question -> {"type"} eq "category") {
         # do nothing - silently skip categories
-    }elsif($question -> {"type"} eq "multichoice") {
+    } elsif($question -> {"type"} eq "multichoice") {
         return $self -> _mdl2bb_multichoice($question);
     } elsif($question -> {"type"} eq "shortanswer") {
         return $self -> _mdl2bb_shortanswer($question);
+    } elsif($question -> {"type"} eq "essay") {
+        return $self -> _mdl2bb_essay($question);
     } else {
         warn "Skipping question '".($question -> {"name"} -> {"text"} || "unknown")."': unsupported type '".$question -> {"type"}."'\n";
     }
@@ -113,6 +115,24 @@ sub _mdl2bb_shortanswer {
     my $self     = shift;
     my $question = shift;
     my $output   = "SR";
+
+    # question text, should be html, so strip leading/trailing space and newlines
+    $output .= "\t".$self -> _cleanup_newlines($question -> {"questiontext"} -> {"text"}, 0);
+
+    return "$output\n";
+}
+
+
+## @method private $ _mdl2bb_essay($question)
+# Convert the question stored in the specified hash from Moodle format to
+# a TSV line suitable to pass to Blackboard.
+#
+# @param question A reference to a hash containing the question information.
+# @return A string containing the question in Blackboard TSV format
+sub _mdl2bb_essay {
+    my $self     = shift;
+    my $question = shift;
+    my $output   = "ESS";
 
     # question text, should be html, so strip leading/trailing space and newlines
     $output .= "\t".$self -> _cleanup_newlines($question -> {"questiontext"} -> {"text"}, 0);

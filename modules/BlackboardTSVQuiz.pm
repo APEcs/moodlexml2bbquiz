@@ -163,7 +163,7 @@ sub _cleanup_newlines {
     $text =~ s/^[\s\x{0d}\x{0a}\x{0c}]+//o;
     $text =~ s/[\s\x{0d}\x{0a}\x{0c}]+$//o;
 
-    my $repl = $addbr ? "<br /><br />" : "";
+    my $repl = $addbr ? "<br /><br />" : " ";
     $text =~ s/\r?\n/$repl/g;
 
     return $text;

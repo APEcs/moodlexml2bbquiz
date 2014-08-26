@@ -107,15 +107,17 @@ sub _mdl2bb_multichoice {
             $output .= "\tcorrect";
             $gotcorrect = 1;
         } else {
-            warn "Encountered unsupported fraction ".$answer -> {"fraction"}." for ".$question -> {"name"} -> {"text"}." answer ".$answer -> {"text"}.": using 'correct'\n";
+            warn "Encountered unsupported fraction '".$answer -> {"fraction"}."' for '".$question -> {"name"} -> {"text"}."' answer '".$answer -> {"text"}."': using 'correct'\n";
             $output .= "\tincorrect";
         }
     }
 
     # Handle the situation where no correct answer has been set by
     # making the final 'incorrect' into a 'correct'
-    $output =~ s/incorrect$/correct/
-        unless($gotcorrect);
+    if(!$gotcorrect) {
+        $output =~ s/incorrect$/correct/;
+        warn "No correct answer set for '".$question -> {"name"} -> {"text"}."'. Setting final answer as correct.\n";
+    }
 
     return "$output\n";
 }

@@ -22,7 +22,7 @@ package BlackboardTSVQuiz;
 
 use v5.12;
 use XML::Simple;
-
+use Data::Dumper;
 # ============================================================================
 #  Constructor
 
@@ -91,20 +91,31 @@ sub _mdl2bb_multichoice {
     my $question = shift;
     my $output   = "MC";
 
+    # support multiselection
+    $output = "MA"
+        if($question -> {"single"} && $question -> {"single"} eq "false");
+
     # question text, should be html, so strip leading/trailing space and newlines
     $output .= "\t".$self -> _cleanup_newlines($question -> {"questiontext"} -> {"text"}, 0);
 
+    my $gotcorrect = 0;
     foreach my $answer (@{$question -> {"answer"}}) {
         $output .= "\t".$self -> _cleanup_newlines($answer -> {"text"});
         if($answer -> {"fraction"} == 0) {
             $output .= "\tincorrect";
         } elsif($answer -> {"fraction"} == 100) {
             $output .= "\tcorrect";
+            $gotcorrect = 1;
         } else {
             warn "Encountered unsupported fraction ".$answer -> {"fraction"}." for ".$question -> {"name"} -> {"text"}." answer ".$answer -> {"text"}.": using 'correct'\n";
             $output .= "\tincorrect";
         }
     }
+
+    # Handle the situation where no correct answer has been set by
+    # making the final 'incorrect' into a 'correct'
+    $output =~ s/incorrect$/correct/
+        unless($gotcorrect);
 
     return "$output\n";
 }
